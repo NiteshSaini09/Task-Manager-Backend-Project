@@ -7,8 +7,6 @@ const taskSchema= new mongoose.Schema({
     },
     description:{
         type:String,
-        required:[true,'Taske description is must'],
-        minlength:6
     },
     status:{
         type:String,
