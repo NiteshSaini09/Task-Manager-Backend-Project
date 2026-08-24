@@ -54,7 +54,7 @@ export const getTask = async (req, res) => {
     console.log(req.params.id);
     if (!taskId) {
       const error = new Error(`Enter Task ID Title to get task`);
-      error.statusCode = 401;
+      error.statusCode = 400;
       throw error;
     }
     if (!mongoose.isValidObjectId(taskId)) {
@@ -77,9 +77,65 @@ export const getTask = async (req, res) => {
   } catch (error) {
     res.status(error?.statusCode || 500).json({
       success: false,
-      message:
-        `${error?.message} Error in getTask By id` ||
-        `Error While retriveing Task`,
+      message: error?.message || `Error While Get Task By Id`,
+    });
+  }
+};
+
+// -------------Update Task By Id-------------
+
+export const updateTask = async (req, res) => {
+  try {
+    const taskId = req.params?.id;
+    if (!taskId) {
+      const error = new Error(`Enter Task ID Title to update task`);
+      error.statusCode = 400;
+      throw error;
+    }
+    const { title, description, status, priority, dueDate } = req.body;
+    if (!title && !description && !status && !priority && !dueDate) {
+      const error = new Error(`Please provide at least one field to update`);
+      error.statusCode = 400;
+      throw error;
+    }
+    if (!mongoose.isValidObjectId(taskId)) {
+      const error = new Error("Invalid Task ID");
+      error.statusCode = 400;
+      throw error;
+    }
+    const updateData = {};
+
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (status !== undefined) updateData.status = status;
+    if (priority !== undefined) updateData.priority = priority;
+    if (dueDate !== undefined) updateData.dueDate = dueDate;
+    const updatedTask = await TaskModel.findOneAndUpdate(
+      {
+        _id: taskId,
+        user: req.user._id,
+      },
+      {
+        $set: updateData,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+    if (!updatedTask) {
+      const error = new Error(`No such Task found`);
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json({
+      message: `Task updated successfully`,
+      task: updatedTask,
+    });
+  } catch (error) {
+    res.status(error?.statusCode || 500).json({
+      success: false,
+      message: error?.message || `Error While Updating Task`,
     });
   }
 };
