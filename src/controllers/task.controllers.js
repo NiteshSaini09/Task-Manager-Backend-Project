@@ -34,14 +34,91 @@ export const addTask = async (req, res) => {
 export const getAllTasks = async (req, res) => {
   try {
     const userId = req.user?._id;
-    const tasks = await TaskModel.find({ user: userId });
-    res.status(200).json({
-      message: "Task retrived",
+
+    const { status, priority, search } = req.query;
+    const page = Number(req.query?.page) || 1;
+    const limit = Number(req.query?.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    if (
+      !Number.isInteger(page) ||
+      !Number.isInteger(limit) ||
+      page < 1 ||
+      limit < 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Page and limit must be positive integers",
+      });
+    }
+    // Base query: only logged-in user's tasks
+    const query = {
+      user: userId,
+    };
+
+    // Filter by status
+    if (status) {
+      const allowedStatus = ["pending", "in-progress", "completed"];
+
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status",
+        });
+      }
+
+      query.status = status;
+    }
+
+    // Filter by priority
+    if (priority) {
+      const allowedPriority = ["low", "medium", "high"];
+
+      if (!allowedPriority.includes(priority)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid priority",
+        });
+      }
+
+      query.priority = priority;
+    }
+
+    // Search title OR description
+    if (search) {
+      query.$or = [
+        {
+          title: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          description: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    const tasks = await TaskModel.find(query).skip(skip).limit(limit);
+    const totalTasks = await TaskModel.countDocuments(query);
+    const totalPages = Math.ceil(totalTasks / limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "Tasks retrieved",
+      count: tasks.length,
+      totalPages,
+      currentPage: page,
+      totalTasks,
       tasks,
     });
   } catch (error) {
-    res.status(500).json({
-      message: error?.message || ` Error While Get All tasks`,
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Error while getting all tasks",
     });
   }
 };
@@ -165,3 +242,5 @@ export const deleteTask = async (req, res) => {
     });
   }
 };
+
+// -----------Search and Filter--------------
