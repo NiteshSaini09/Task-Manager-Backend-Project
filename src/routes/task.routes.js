@@ -8,7 +8,7 @@ router.route('/').post(veryfyJWT,taskController.addTask)
 router.route('/').get(veryfyJWT,taskController.getAllTasks)
 router.route('/:id').get(veryfyJWT,taskController.getTask)
 router.route('/:id').patch(veryfyJWT,taskController.updateTask)
-// router.route('/:id').delete(veryfyJWT,taskController.deleteTask)
+router.route('/:id').delete(veryfyJWT,taskController.deleteTask)
 
 
 export default router

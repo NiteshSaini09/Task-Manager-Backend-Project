@@ -93,11 +93,6 @@ export const updateTask = async (req, res) => {
       throw error;
     }
     const { title, description, status, priority, dueDate } = req.body;
-    if (!title && !description && !status && !priority && !dueDate) {
-      const error = new Error(`Please provide at least one field to update`);
-      error.statusCode = 400;
-      throw error;
-    }
     if (!mongoose.isValidObjectId(taskId)) {
       const error = new Error("Invalid Task ID");
       error.statusCode = 400;
@@ -136,6 +131,37 @@ export const updateTask = async (req, res) => {
     res.status(error?.statusCode || 500).json({
       success: false,
       message: error?.message || `Error While Updating Task`,
+    });
+  }
+};
+
+// ------------Delate Task By Id-------------
+
+export const deleteTask = async (req, res) => {
+  try {
+    const taskId = req.params?.id;
+    if (!mongoose.isValidObjectId(taskId)) {
+      const error = new Error(`Task ID is Not Valid`);
+      error.statusCode = 400;
+      throw error;
+    }
+    const deletedTask = await TaskModel.findOneAndDelete({
+      _id: taskId,
+      user: req.user._id,
+    });
+    if (!deletedTask) {
+      const error = new Error(`Can't Find Task to delete`);
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json({
+      message: `Task Deleted Successfully`,
+      deletedTask,
+    });
+  } catch (error) {
+    res.status(error?.statusCode || 500).json({
+      error: true,
+      message: error.message,
     });
   }
 };
