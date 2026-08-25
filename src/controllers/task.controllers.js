@@ -37,14 +37,6 @@ export const getAllTasks = async (req, res,next) => {
     const limit = Number(req.query?.limit) || 5;
     const skip = (page - 1) * limit;
 
-    if (
-      !Number.isInteger(page) ||
-      !Number.isInteger(limit) ||
-      page < 1 ||
-      limit < 1
-    ) {
-      throw new ApiError("Page and limit must be positive integers", 400);
-    }
     // Base query: only logged-in user's tasks
     const query = {
       user: userId,
@@ -52,23 +44,11 @@ export const getAllTasks = async (req, res,next) => {
 
     // Filter by status
     if (status) {
-      const allowedStatus = ["pending", "in-progress", "completed"];
-
-      if (!allowedStatus.includes(status)) {
-        throw new ApiError("Invalid status", 400);
-      }
-
       query.status = status;
     }
 
     // Filter by priority
     if (priority) {
-      const allowedPriority = ["low", "medium", "high"];
-
-      if (!allowedPriority.includes(priority)) {
-        throw new ApiError("Invalid priority", 400);
-      }
-
       query.priority = priority;
     }
 
