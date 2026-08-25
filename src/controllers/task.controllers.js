@@ -5,15 +5,17 @@ import ApiError from "../utils/apiError.js";
 
 export const addTask = async (req, res,next) => {
   try {
-    const { title, description } = req.body;
-    if (!title) {
-      throw new ApiError("Task title is required", 400);
+    const { title, description,status,priority,dueDate } = req.body;
+    const taskData={
+      user:req.user?._id,
+      title:title
     }
-    const user = req.user?._id;
-    if (!user) {
-      throw new ApiError("User authentication required", 401);
-    }
-    const task = await TaskModel.create({ title, description, user });
+     if (description !== undefined) taskData.description = description;
+     if (status !== undefined) taskData.status = status;
+     if (priority !== undefined) taskData.priority = priority;
+     if (dueDate !== undefined) taskData.dueDate = dueDate;
+    
+    const task = await TaskModel.create(taskData);
     res.status(201).json({
       success: true,
       message: "New task added Successfully",
