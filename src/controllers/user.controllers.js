@@ -5,11 +5,6 @@ import { UserModel } from "../models/user.model.js";
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Name, email, and password are required" });
-    }
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return res
@@ -35,11 +30,6 @@ export const register = async (req, res) => {
 export const login= async(req,res)=>{
   try {
     const {email,password}=req?.body
-  if(!email || !password){
-    return res.status(401).json({
-      message:`Email and Password is required for Login`
-    })
-  }
   const user=await UserModel.findOne({email})
   if(!user){
     return res.status(404).json({

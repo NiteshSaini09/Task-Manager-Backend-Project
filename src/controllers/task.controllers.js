@@ -1,20 +1,17 @@
 import { TaskModel } from "../models/task.model.js";
 import mongoose from "mongoose";
+import ApiError from "../utils/apiError.js";
 // -------------Add Task---------------
 
-export const addTask = async (req, res) => {
+export const addTask = async (req, res,next) => {
   try {
     const { title, description } = req.body;
     if (!title) {
-      const error = new Error("Please Enter Title of Task");
-      error.statusCode = 400;
-      throw error;
+      throw new ApiError("Task title is required", 400);
     }
     const user = req.user?._id;
     if (!user) {
-      const error = new Error("User authentication required");
-      error.statusCode = 401;
-      throw error;
+      throw new ApiError("User authentication required", 401);
     }
     const task = await TaskModel.create({ title, description, user });
     res.status(201).json({
@@ -23,15 +20,13 @@ export const addTask = async (req, res) => {
       task,
     });
   } catch (error) {
-    res.status(error?.statusCode || 500).json({
-      message: error?.message || `Error While Adding New Task`,
-    });
+   next(error)
   }
 };
 
 //--------------Get All Tasks -------------
 
-export const getAllTasks = async (req, res) => {
+export const getAllTasks = async (req, res,next) => {
   try {
     const userId = req.user?._id;
 
@@ -46,10 +41,7 @@ export const getAllTasks = async (req, res) => {
       page < 1 ||
       limit < 1
     ) {
-      return res.status(400).json({
-        success: false,
-        message: "Page and limit must be positive integers",
-      });
+      throw new ApiError("Page and limit must be positive integers", 400);
     }
     // Base query: only logged-in user's tasks
     const query = {
@@ -61,10 +53,7 @@ export const getAllTasks = async (req, res) => {
       const allowedStatus = ["pending", "in-progress", "completed"];
 
       if (!allowedStatus.includes(status)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid status",
-        });
+        throw new ApiError("Invalid status", 400);
       }
 
       query.status = status;
@@ -75,10 +64,7 @@ export const getAllTasks = async (req, res) => {
       const allowedPriority = ["low", "medium", "high"];
 
       if (!allowedPriority.includes(priority)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid priority",
-        });
+        throw new ApiError("Invalid priority", 400);
       }
 
       query.priority = priority;
@@ -116,64 +102,48 @@ export const getAllTasks = async (req, res) => {
       tasks,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error?.message || "Error while getting all tasks",
-    });
+    next(error);
   }
 };
 
 // ----------Get Task By Id------------
 
-export const getTask = async (req, res) => {
+export const getTask = async (req, res,next) => {
   try {
     const taskId = req.params?.id;
     console.log(req.params.id);
     if (!taskId) {
-      const error = new Error(`Enter Task ID Title to get task`);
-      error.statusCode = 400;
-      throw error;
+      throw new ApiError("Task ID is required", 400);
     }
     if (!mongoose.isValidObjectId(taskId)) {
-      const error = new Error("Invalid Task ID");
-      error.statusCode = 400;
-      throw error;
+      throw new ApiError("Invalid Task ID", 400);
     }
     const task = await TaskModel.findOne({
       $and: [{ _id: taskId }, { user: req.user._id }],
     });
     if (!task) {
-      const error = new Error(`No such Task found`);
-      error.statusCode = 404;
-      throw error;
+      throw new ApiError(`No such Task found`, 404);
     }
     res.status(200).json({
       message: `Task found`,
       task,
     });
   } catch (error) {
-    res.status(error?.statusCode || 500).json({
-      success: false,
-      message: error?.message || `Error While Get Task By Id`,
-    });
+    next(error);
   }
 };
 
 // -------------Update Task By Id-------------
 
-export const updateTask = async (req, res) => {
+export const updateTask = async (req, res,next) => {
   try {
     const taskId = req.params?.id;
     if (!taskId) {
-      const error = new Error(`Enter Task ID Title to update task`);
-      error.statusCode = 400;
-      throw error;
+      throw new ApiError("Task ID is required", 400);
     }
     const { title, description, status, priority, dueDate } = req.body;
     if (!mongoose.isValidObjectId(taskId)) {
-      const error = new Error("Invalid Task ID");
-      error.statusCode = 400;
-      throw error;
+      throw new ApiError("Invalid Task ID", 400);
     }
     const updateData = {};
 
@@ -196,50 +166,38 @@ export const updateTask = async (req, res) => {
       },
     );
     if (!updatedTask) {
-      const error = new Error(`No such Task found`);
-      error.statusCode = 404;
-      throw error;
+     throw new ApiError(`Can't Find Task to update`, 404)
     }
     res.status(200).json({
       message: `Task updated successfully`,
       task: updatedTask,
     });
   } catch (error) {
-    res.status(error?.statusCode || 500).json({
-      success: false,
-      message: error?.message || `Error While Updating Task`,
-    });
+    next(error);
   }
 };
 
 // ------------Delate Task By Id-------------
 
-export const deleteTask = async (req, res) => {
+export const deleteTask = async (req, res,next) => {
   try {
     const taskId = req.params?.id;
     if (!mongoose.isValidObjectId(taskId)) {
-      const error = new Error(`Task ID is Not Valid`);
-      error.statusCode = 400;
-      throw error;
+      throw new ApiError("Task ID is Not Valid", 400);
     }
     const deletedTask = await TaskModel.findOneAndDelete({
       _id: taskId,
       user: req.user._id,
     });
     if (!deletedTask) {
-      const error = new Error(`Can't Find Task to delete`);
-      error.statusCode = 404;
-      throw error;
+      throw new ApiError(`Can't Find Task to delete`, 404);
     }
     res.status(200).json({
       message: `Task Deleted Successfully`,
       deletedTask,
     });
   } catch (error) {
-    res.status(error?.statusCode || 500).json({
-      error: true,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
