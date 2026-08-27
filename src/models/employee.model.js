@@ -3,3 +3,5 @@ const employeeSchema=mongoose.Schema({
       name:{},
       age:{}
 },{timestamps:true})
+
+export const EmployeeModel
