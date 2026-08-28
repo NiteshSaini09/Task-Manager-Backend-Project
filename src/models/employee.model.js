@@ -4,4 +4,4 @@ const employeeSchema=mongoose.Schema({
       age:{}
 },{timestamps:true})
 
-export const EmployeeModel
+export const EmployeeModel=mongoose.model("Employee", employeeSchema)
