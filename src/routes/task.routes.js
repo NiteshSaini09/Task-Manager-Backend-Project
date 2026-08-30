@@ -7,7 +7,7 @@ import { addTaskValidator,getAllTasksValidator,updateTaskValidator,taskIdValidat
 const router =Router()
 
 router.route('/').post(veryfyJWT,validate(addTaskValidator),taskController.addTask)
-router.route('/').get(veryfyJWT,validate(getAllTasksValidator,'query'),taskController.getAllTasks)
+router.route('/').get(veryfyJWT,validate(getAllTasksValidator,"query"),taskController.getAllTasks)
 router.route('/:id').get(veryfyJWT,validate(taskIdValidator,"params"),taskController.getTask)
 router.route('/:id').patch(veryfyJWT,validate(taskIdValidator),validate(updateTaskValidator),taskController.updateTask)
 router.route('/:id').delete(veryfyJWT,validate(taskIdValidator),taskController.deleteTask)

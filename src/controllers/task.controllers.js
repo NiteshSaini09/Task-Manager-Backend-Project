@@ -32,7 +32,7 @@ export const getAllTasks = async (req, res,next) => {
   try {
     const userId = req.user?._id;
 
-    const { status, priority, search,sortBy,order} = req.query;
+    const { status, priority, search,sortBy,order,page,limit} = req.validQuery;
     const skip = (page - 1) * limit;
 
     // Base query: only logged-in user's tasks
@@ -71,6 +71,7 @@ export const getAllTasks = async (req, res,next) => {
     const sort={
       [sortBy]:sortOrder
     }
+    
     const tasks = await TaskModel.find(query).sort(sort).skip(skip).limit(limit);
     const totalTasks = await TaskModel.countDocuments(query);
     const totalPages = Math.ceil(totalTasks / limit);

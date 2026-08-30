@@ -3,18 +3,29 @@ import ApiError from "../utils/apiError.js";
 
 // -------------register-------------
 
-export const register = async (req, res,next) => {
+export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      throw new ApiError("Email already exists, Please use a different email",400)
-     }
+      throw new ApiError(
+        "Email already exists, Please use a different email",
+        400,
+      );
+    }
     // const hashedPassword = await bcrypt.hash(password, 10);
     const user = await UserModel.create({ name, email, password });
-    res.status(201).json({ message: "User registered successfully", user });
+    const registeredUser = await UserModel.findById(user?._id)?.select("-password -createdAt -updatedAt");
+    if (!registeredUser) {
+      throw new ApiError(
+        "User Not Registerd",
+        500,
+      );
+    }
+
+    res.status(201).json({ message: "User registered successfully", registeredUser });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -55,6 +66,6 @@ export const login = async (req, res, next) => {
         // accessToken
       });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };

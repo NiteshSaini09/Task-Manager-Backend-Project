@@ -10,7 +10,12 @@ export const validate=(schema,target="body")=>{
                 message:error.details[0].message    
             });
         }
-        req[target]=value;
+        if(target==="query"){
+            req.validQuery=value
+        }else{
+
+            req[target]=value;
+        }
         next()
     }
 }
