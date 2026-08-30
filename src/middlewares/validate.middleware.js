@@ -13,7 +13,6 @@ export const validate=(schema,target="body")=>{
         if(target==="query"){
             req.validQuery=value
         }else{
-
             req[target]=value;
         }
         next()

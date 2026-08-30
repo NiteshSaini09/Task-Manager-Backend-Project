@@ -23,12 +23,3 @@ export const getAllTasksValidator=Joi.object({
     sortBy:Joi.string().trim().valid('createdAt','updatedAt','title','priority','dueDate').default('createdAt'),
     order:Joi.string().trim().valid('asc','desc').default('desc'),
 })
-
-export const taskIdValidator = Joi.object({
-    id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)   
-        .required()
-        .messages({
-            "string.pattern.base": "Invalid task ID"
-        })
-});
