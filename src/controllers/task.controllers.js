@@ -32,9 +32,7 @@ export const getAllTasks = async (req, res,next) => {
   try {
     const userId = req.user?._id;
 
-    const { status, priority, search } = req.query;
-    const page = Number(req.query?.page) || 1;
-    const limit = Number(req.query?.limit) || 5;
+    const { status, priority, search,sortBy,order} = req.query;
     const skip = (page - 1) * limit;
 
     // Base query: only logged-in user's tasks
@@ -69,8 +67,11 @@ export const getAllTasks = async (req, res,next) => {
         },
       ];
     }
-
-    const tasks = await TaskModel.find(query).skip(skip).limit(limit);
+    const sortOrder = order === 'asc'?1:-1;
+    const sort={
+      [sortBy]:sortOrder
+    }
+    const tasks = await TaskModel.find(query).sort(sort).skip(skip).limit(limit);
     const totalTasks = await TaskModel.countDocuments(query);
     const totalPages = Math.ceil(totalTasks / limit);
 

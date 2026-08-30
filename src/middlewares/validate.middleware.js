@@ -1,26 +1,29 @@
-export const validate=(schema)=>{
+export const validate=(schema,target="body")=>{
     return(req,res,next)=>{
-        const {error,value}=schema.validate(req.body);
+        const {error,value}=schema.validate(req[target],{
+            abortEarly:false,
+            stripUnknown:true
+        });
         if(error){
             return res.status(400).json({
                 success:false,
                 message:error.details[0].message    
             });
         }
-        req.body=value;
+        req[target]=value;
         next()
     }
 }
-export const validateQuery=(schema)=>{
-    return(req,res,next)=>{
-        const {error,value}=schema.validate(req.query);
-        if(error){
-            return res.status(400).json({
-                success:false,
-                message:error.details[0].message    
-            });
-        }
-        req.body=value;
-        next()
-    }
-}
+// export const validateQuery=(schema)=>{
+//     return(req,res,next)=>{
+//         const {error,value}=schema.validate(req.query);
+//         if(error){
+//             return res.status(400).json({
+//                 success:false,
+//                 message:error.details[0].message    
+//             });
+//         }
+//         req.body=value;
+//         next()
+//     }
+// }
