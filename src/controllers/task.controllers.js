@@ -115,7 +115,6 @@ export const getTask = async (req, res,next) => {
     next(error);
   }
 };
-
 // -------------Update Task By Id-------------
 
 export const updateTask = async (req, res,next) => {
