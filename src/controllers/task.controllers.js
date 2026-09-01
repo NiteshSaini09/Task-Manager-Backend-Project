@@ -26,6 +26,8 @@ export const addTask = async (req, res,next) => {
   }
 };
 
+
+
 //--------------Get All Tasks -------------
 
 export const getAllTasks = async (req, res,next) => {
@@ -35,22 +37,14 @@ export const getAllTasks = async (req, res,next) => {
     const { status, priority, search,sortBy,order,page,limit} = req.validQuery;
     const skip = (page - 1) * limit;
 
-    // Base query: only logged-in user's tasks
     const query = {
       user: userId,
     };
 
-    // Filter by status
-    if (status) {
-      query.status = status;
-    }
+    if (status)query.status = status;
 
-    // Filter by priority
-    if (priority) {
-      query.priority = priority;
-    }
-
-    // Search title OR description
+    if (priority)query.priority = priority;
+    
     if (search) {
       query.$or = [
         {
@@ -90,6 +84,8 @@ export const getAllTasks = async (req, res,next) => {
   }
 };
 
+
+
 // ----------Get Task By Id------------
 
 export const getTask = async (req, res,next) => {
@@ -116,6 +112,8 @@ export const getTask = async (req, res,next) => {
     next(error);
   }
 };
+
+
 // -------------Update Task By Id-------------
 
 export const updateTask = async (req, res,next) => {
@@ -144,7 +142,7 @@ export const updateTask = async (req, res,next) => {
         $set: updateData,
       },
       {
-        new: true,
+        returnDocument:true,
         runValidators: true,
       },
     );

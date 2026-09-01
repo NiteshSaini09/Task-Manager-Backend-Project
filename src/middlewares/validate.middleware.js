@@ -27,7 +27,7 @@ export const validate=(schema,target="body")=>{
 //                 message:error.details[0].message    
 //             });
 //         }
-//         req.body=value;
+//         req.query=value;
 //         next()
 //     }
 // }
